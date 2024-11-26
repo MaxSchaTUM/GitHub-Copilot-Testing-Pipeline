@@ -61,14 +61,15 @@ export function activate(context: vscode.ExtensionContext) {
         // we use a simple heuristic for the name for now
         const testClass = currentClass.replace("main", "test");
         terminal.sendText(`rm -rm ${testClass}`);
-      }
 
-      // const document = await vscode.workspace.openTextDocument(filePath);
-      // await vscode.window.showTextDocument(document);
-      // // vscode.window.showInformationMessage('File opened');
-      // await vscode.commands.executeCommand('github.copilot.chat.generateTests');
-      // await waitForStableCharacterCount();
-      // await vscode.commands.executeCommand('workbench.action.files.save');
+        const document = await vscode.workspace.openTextDocument(currentClass);
+        await vscode.window.showTextDocument(document);
+        await vscode.commands.executeCommand(
+          "github.copilot.chat.generateTests"
+        );
+        await waitForStableCharacterCount();
+        await vscode.commands.executeCommand("workbench.action.files.save");
+      }
     }
   );
 
