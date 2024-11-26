@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-const waitForStableCharacterCount = async (timeout = 15000) => {
+const waitForStableCharacterCount = async (timeout = 30000) => {
   const start = Date.now();
   let previousCharacterCount = -1;
   let stableForOneSecond = false;
@@ -28,7 +28,7 @@ const waitForStableCharacterCount = async (timeout = 15000) => {
     previousCharacterCount = currentCharacterCount;
 
     // Wait for 1 second before checking again
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 
   throw new Error(
