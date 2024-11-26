@@ -45,6 +45,10 @@ export function activate(context: vscode.ExtensionContext) {
     "gentestcopilot.helloWorld",
 
     async () => {
+      // open project in vscode workspace
+      vscode.workspace.updateWorkspaceFolders(0, 0, {
+        uri: vscode.Uri.file(PROJECT_PATH),
+      });
       // get classes
       const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
       const classesContent = classes.getText();
@@ -63,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
         // delete test class if it exists
         // we use a simple heuristic for the name for now
         const testClass = currentClass.replace("main", "test");
-        terminal.sendText(`rm -rm ${testClass}`);
+        terminal.sendText(`rm -rf ${testClass}`);
 
         const document = await vscode.workspace.openTextDocument(currentClass);
         await vscode.window.showTextDocument(document);
