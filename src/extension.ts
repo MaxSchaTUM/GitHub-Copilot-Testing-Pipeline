@@ -58,8 +58,10 @@ export function activate(context: vscode.ExtensionContext) {
       terminal.sendText(`git checkout -b master`, true); // go to master to have clean start
 
       for (const currentClass of classesArray) {
-        terminal.sendText(`git branch ${currentClass}`, true);
-        terminal.sendText(`git checkout ${currentClass}`, true);
+        // extract class name from path
+        const className = currentClass.split("/").pop();
+        terminal.sendText(`git branch ${className}`, true);
+        terminal.sendText(`git checkout ${className}`, true);
       }
 
       vscode.window.showInformationMessage("Checked out branch start");
