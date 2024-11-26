@@ -61,9 +61,10 @@ export function activate(context: vscode.ExtensionContext) {
       terminal.sendText(`git checkout master`); // TODO or main?
 
       for (const currentClass of classesArray) {
+        const className = currentClass.split("/").pop();
         // create new branch
-        terminal.sendText(`git branch ${currentClass}`, true);
-        terminal.sendText(`git checkout ${currentClass}`, true);
+        terminal.sendText(`git branch ${className}`, true);
+        terminal.sendText(`git checkout ${className}`, true);
         // delete test class if it exists
         // we use a simple heuristic for the name for now
         const testClass = currentClass.replace("main", "test");
