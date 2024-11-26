@@ -69,7 +69,9 @@ export function activate(context: vscode.ExtensionContext) {
         const testClass = currentClass.replace("main", "test");
         terminal.sendText(`rm -rf ${testClass}`);
 
-        const document = await vscode.workspace.openTextDocument(currentClass);
+        const document = await vscode.workspace.openTextDocument(
+          PROJECT_PATH + "/" + currentClass
+        );
         await vscode.window.showTextDocument(document);
         await vscode.commands.executeCommand(
           "github.copilot.chat.generateTests"
