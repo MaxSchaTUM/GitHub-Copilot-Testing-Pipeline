@@ -44,18 +44,23 @@ export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
   const disposable = vscode.commands.registerCommand(
     "gentestcopilot.helloWorld",
+
     async () => {
+      // get classes
       const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
       const classesContent = classes.getText();
       const classesArray = classesContent.split("\n");
+      classesArray.pop(); // remove last empty element
+      // prep terminal
+      const terminal = vscode.window.createTerminal();
+      terminal.show();
+      terminal.sendText(`cd ${PROJECT_PATH}`);
+      terminal.sendText(`git checkout -b master`, true); // go to master to have clean start
 
       for (const currentClass of classesArray) {
+        terminal.sendText(`git branch ${currentClass}`, true);
+        terminal.sendText(`git checkout ${currentClass}`, true);
       }
-
-      //   const terminal = vscode.window.createTerminal();
-      //   terminal.show();
-      //   terminal.sendText(`cd ${projectPath}`);
-      //   terminal.sendText("git checkout start");
 
       vscode.window.showInformationMessage("Checked out branch start");
       // const document = await vscode.workspace.openTextDocument(filePath);
