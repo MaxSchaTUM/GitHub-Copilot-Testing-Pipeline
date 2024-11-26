@@ -83,31 +83,6 @@ export function activate(context: vscode.ExtensionContext) {
         await waitForStableCharacterCount();
         await vscode.commands.executeCommand("workbench.action.files.save");
 
-        // remove package line from old position
-        // needed because copilot often places it wrong
-        const packageLine = document
-          .getText()
-          .split("\n")
-          .find((line) => line.startsWith("package"));
-
-        if (packageLine) {
-          const lineNumber = document
-            .getText()
-            .split("\n")
-            .indexOf(packageLine);
-
-          const lineRange = document.lineAt(lineNumber).range;
-
-          await vscode.window.activeTextEditor?.edit((editBuilder) => {
-            editBuilder.delete(lineRange);
-          });
-
-          // insert package line at very top
-          await vscode.window.activeTextEditor?.edit((editBuilder) => {
-            editBuilder.insert(new vscode.Position(0, 0), packageLine + "\n");
-          });
-        }
-
         // +++++
         // TODO test via mvn
         // +++++
