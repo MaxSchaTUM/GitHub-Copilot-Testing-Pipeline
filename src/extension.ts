@@ -68,7 +68,9 @@ export function activate(context: vscode.ExtensionContext) {
         terminal.sendText(`git checkout ${className}`, true);
         // delete test class if it exists
         // we use a simple heuristic for the name for now
-        const testClass = currentClass.replace("main", "test");
+        const testClass = currentClass
+          .replace("main", "test")
+          .replace(".java", "Test.java");
         terminal.sendText(`rm -rf ${testClass}`);
 
         const document = await vscode.workspace.openTextDocument(
