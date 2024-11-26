@@ -37,7 +37,7 @@ const waitForStableCharacterCount = async (timeout = 15000) => {
 };
 const BASE_PATH = "/Users/schaller/code/automated-generation-copilot";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
-const CLASSES_PATH = `${BASE_PATH}/classes.txt`;
+const CLASSES_PATH = `${BASE_PATH}/classes.txt`; // contains list of relative path to classes within a project, one per line
 
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
@@ -63,7 +63,6 @@ export function activate(context: vscode.ExtensionContext) {
         terminal.sendText(`rm -rm ${testClass}`);
       }
 
-      vscode.window.showInformationMessage("Checked out branch start");
       // const document = await vscode.workspace.openTextDocument(filePath);
       // await vscode.window.showTextDocument(document);
       // // vscode.window.showInformationMessage('File opened');
