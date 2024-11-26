@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-
 const waitForStableCharacterCount = async (timeout = 15000) => {
   const start = Date.now();
   let previousCharacterCount = -1;
@@ -55,13 +54,13 @@ export function activate(context: vscode.ExtensionContext) {
       const terminal = vscode.window.createTerminal();
       terminal.show();
       terminal.sendText(`cd ${PROJECT_PATH}`);
-      terminal.sendText(`git checkout -b master`, true); // go to master to have clean start
+      terminal.sendText(`git checkout -b master`); // go to master to have clean start
 
       for (const currentClass of classesArray) {
-        // extract class name from path
-        const className = currentClass.split("/").pop();
-        terminal.sendText(`git branch ${className}`, true);
-        terminal.sendText(`git checkout ${className}`, true);
+        // delete test class if it exists
+        // we use a simple heuristic for the name for now
+        const testClass = currentClass.replace("main", "test");
+        terminal.sendText(`rm -rm ${testClass}`);
       }
 
       vscode.window.showInformationMessage("Checked out branch start");
