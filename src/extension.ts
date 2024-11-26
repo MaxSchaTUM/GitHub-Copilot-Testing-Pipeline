@@ -54,9 +54,12 @@ export function activate(context: vscode.ExtensionContext) {
       const terminal = vscode.window.createTerminal();
       terminal.show();
       terminal.sendText(`cd ${PROJECT_PATH}`);
-      terminal.sendText(`git checkout -b master`); // go to master to have clean start
+      terminal.sendText(`git checkout master`); // TODO or main?
 
       for (const currentClass of classesArray) {
+        // create new branch
+        terminal.sendText(`git branch ${currentClass}`, true);
+        terminal.sendText(`git checkout ${currentClass}`, true);
         // delete test class if it exists
         // we use a simple heuristic for the name for now
         const testClass = currentClass.replace("main", "test");
@@ -69,6 +72,16 @@ export function activate(context: vscode.ExtensionContext) {
         );
         await waitForStableCharacterCount();
         await vscode.commands.executeCommand("workbench.action.files.save");
+
+        // +++++
+        // TODO test via mvn
+        // +++++
+
+        // cleanup / reset
+        terminal.sendText(
+          'git add . && git commit -m "Did everything"' // TODO split up into more commits on the way?
+        );
+        terminal.sendText("git checkout master");
       }
     }
   );
