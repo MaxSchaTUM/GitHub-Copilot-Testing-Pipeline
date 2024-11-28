@@ -63,6 +63,10 @@ export function activate(context: vscode.ExtensionContext) {
 
       for (const currentClass of classesArray) {
         const className = currentClass.split("/").pop();
+        if (!className) {
+          // TODO logging etc
+          continue;
+        }
         // create new branch
         terminal.sendText(`git branch ${className}`, true);
         terminal.sendText(`git checkout ${className}`, true);
@@ -84,7 +88,12 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand("workbench.action.files.save");
 
         // +++++
+        // mvn test -Dtest=YourTestClassName > repoortFolder/YourTestClassName.txt
+
         // TODO test via mvn
+        const testClassName = className.replace(".java", "Test.java");
+        terminal.sendText(`mvn test -Dtest=${testClassName}`);
+
         // +++++
 
         // cleanup / reset
