@@ -115,13 +115,16 @@ export function activate(context: vscode.ExtensionContext) {
           const testClassName = className.replace(".java", "Test.java");
 
           // not using execl because manual handling of stderr
-          logToFile(`Compiling all tests`);
-          const { stderr, stdout, error } = await exec("mvn test-compile", {
-            cwd: PROJECT_PATH,
-          });
+          logToFile(`Compiling all tests and running new test`);
+          const { stderr, stdout, error } = await exec(
+            `mvn test -Dtest=${testClassName}`,
+            {
+              cwd: PROJECT_PATH,
+            }
+          );
           if (error) {
             // LOG error
-            logToFile(`Error compiling tests: ${error}`);
+            logToFile(`Error compiling or running test: ${error}`);
             // write to report file
             fs.writeFileSync(
               `${REPORTS_FOLDER}/${testClassName}.failure.txt`,
@@ -129,7 +132,7 @@ export function activate(context: vscode.ExtensionContext) {
             );
           } else {
             // LOG success
-            logToFile(`Tests compiled successfully`);
+            logToFile(`Tests compiled and ran successfully`);
             // write stdout to file
             fs.writeFileSync(
               `${REPORTS_FOLDER}/${testClassName}.success.txt`,
