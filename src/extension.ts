@@ -1,3 +1,4 @@
+import * as fs from "fs";
 import * as vscode from "vscode";
 const waitForStableCharacterCount = async (timeout = 30000) => {
   const start = Date.now();
@@ -31,6 +32,7 @@ const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/Jsoup`;
 const CLASSES_PATH = `${BASE_PATH}/allClassPaths.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/Jsoup`;
+const LOG_FILE = `${BASE_PATH}/log.txt`;
 
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
@@ -55,63 +57,75 @@ export function activate(context: vscode.ExtensionContext) {
       terminal.sendText(`git checkout master`); // TODO or main?
 
       for (const currentClass of classesArray) {
-        const className = currentClass.split("/").pop();
-        if (!className) {
-          console.log("no class name found");
-          continue;
-        }
-        // create new branch
-        terminal.sendText(`git branch ${className}`, true);
-        terminal.sendText(`git checkout ${className}`, true);
-        // delete test class if it exists
-        // we use a simple heuristic for the name for now
-        const testClass = currentClass
-          .replace("main", "test")
-          .replace(".java", "Test.java");
-        terminal.sendText(`rm -rf ${testClass}`);
-
-        const cutDocument = await vscode.workspace.openTextDocument(
-          PROJECT_PATH + "/" + currentClass
-        );
-        await vscode.window.showTextDocument(cutDocument);
-        await vscode.commands.executeCommand(
-          "github.copilot.chat.generateTests"
-        );
-        await waitForStableCharacterCount();
-        await vscode.commands.executeCommand("workbench.action.files.save"); // triggers auto import
-
-        const testDocument = vscode.window.activeTextEditor?.document;
-        if (!testDocument) {
-          console.log("no test document found");
-          continue;
-        }
-        const linesOfTestDocument = testDocument.getText().split("\n");
-        for (let i = 0; i < linesOfTestDocument.length; i++) {
-          const line = linesOfTestDocument[i];
-          if (line.includes("package")) {
-            // delete package line at current line
-            await vscode.window.activeTextEditor?.edit((editBuilder) => {
-              editBuilder.delete(testDocument.lineAt(i).range);
-            });
-            // insert at top
-            await vscode.window.activeTextEditor?.edit((editBuilder) => {
-              editBuilder.insert(new vscode.Position(0, 0), line + "\n");
-            });
-            break;
+        // write to log file prosessing current class
+        fs.appendFileSync(LOG_FILE, `${currentClass}\n`);
+        try {
+          const className = currentClass.split("/").pop();
+          if (!className) {
+            console.log("no class name found");
+            continue;
           }
+          // create new branch
+          terminal.sendText(`git branch ${className}`, true);
+          terminal.sendText(`git checkout ${className}`, true);
+          // delete test class if it exists
+          // we use a simple heuristic for the name for now
+          const testClass = currentClass
+            .replace("main", "test")
+            .replace(".java", "Test.java");
+          terminal.sendText(`rm -rf ${testClass}`);
+
+          const cutDocument = await vscode.workspace.openTextDocument(
+            PROJECT_PATH + "/" + currentClass
+          );
+          await vscode.window.showTextDocument(cutDocument);
+          await vscode.commands.executeCommand(
+            "github.copilot.chat.generateTests"
+          );
+          await waitForStableCharacterCount();
+          await vscode.commands.executeCommand("workbench.action.files.save"); // triggers auto import
+
+          const testDocument = vscode.window.activeTextEditor?.document;
+          if (!testDocument) {
+            console.log("no test document found");
+            continue;
+          }
+          const linesOfTestDocument = testDocument.getText().split("\n");
+          for (let i = 0; i < linesOfTestDocument.length; i++) {
+            const line = linesOfTestDocument[i];
+            if (line.includes("package")) {
+              // delete package line at current line
+              await vscode.window.activeTextEditor?.edit((editBuilder) => {
+                editBuilder.delete(testDocument.lineAt(i).range);
+              });
+              // insert at top
+              await vscode.window.activeTextEditor?.edit((editBuilder) => {
+                editBuilder.insert(new vscode.Position(0, 0), line + "\n");
+              });
+              break;
+            }
+          }
+
+          await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
+
+          const testClassName = className.replace(".java", "Test.java");
+          terminal.sendText(
+            `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`
+          );
+
+          terminal.sendText(
+            'git add . && git commit -m "Did everything"' // TODO split up into more commits on the way?
+          );
+          terminal.sendText("git checkout master");
+        } catch (error) {
+          console.log(error);
+          // write error to file with timestamp
+          const date = new Date();
+          const errorMessage = `${date.toISOString()} ${error}`;
+          fs.writeFileSync(LOG_FILE, errorMessage);
+          terminal.sendText('git add . && git commit -m "Error"');
+          terminal.sendText("git checkout master");
         }
-
-        await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
-
-        const testClassName = className.replace(".java", "Test.java");
-        terminal.sendText(
-          `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`
-        );
-
-        terminal.sendText(
-          'git add . && git commit -m "Did everything"' // TODO split up into more commits on the way?
-        );
-        terminal.sendText("git checkout master");
       }
     }
   );
