@@ -59,14 +59,15 @@ export function activate(context: vscode.ExtensionContext) {
       const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
       const classesContent = classes.getText();
       const classesArray = classesContent.split("\n");
-      await execl(`git checkout master`);
 
       for (const currentClass of classesArray) {
+        // start from clean state
+        await execl(`git checkout -f master`);
         // write to log file prosessing current class
         try {
           const className = currentClass.split("/").pop();
           if (!className) {
-            console.log("no class name found");
+            logToFile(`No class name found, Skipping class ${currentClass}`);
             continue;
           }
           // create new branch
@@ -90,7 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
 
           const testDocument = vscode.window.activeTextEditor?.document;
           if (!testDocument) {
-            console.log("no test document found");
+            logToFile(`No test document found, Skipping class ${currentClass}`);
             continue;
           }
           const linesOfTestDocument = testDocument.getText().split("\n");
@@ -138,11 +139,10 @@ export function activate(context: vscode.ExtensionContext) {
 
           // TODO split up into more commits on the way?
           await execl('git add . && git commit -m "Did everything"');
-          await execl("git checkout master");
         } catch (error) {
           logToFile(`Error processing class ${currentClass}: ${error}`);
-          logToFile(`Rolling back to master and skipping to next class`);
-          await execl("git checkout -f master");
+          logToFile(`skipping to next class`);
+          continue;
         }
       }
     }
