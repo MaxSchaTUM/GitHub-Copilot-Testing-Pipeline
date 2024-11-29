@@ -27,9 +27,10 @@ const waitForStableCharacterCount = async (timeout = 30000) => {
     "Timeout: Character count did not stabilize within the given time."
   );
 };
-const BASE_PATH = "/Users/schaller/code/automated-generation-copilot";
-const PROJECT_PATH = `${BASE_PATH}/jsoup`;
-const CLASSES_PATH = `${BASE_PATH}/classes.txt`; // contains list of relative path to classes within a project, one per line
+const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
+const PROJECT_PATH = `${BASE_PATH}/Jsoup`;
+const CLASSES_PATH = `${BASE_PATH}/allClassPaths.txt`; // contains list of relative path to classes within a project, one per line
+const REPORTS_FOLDER = `${BASE_PATH}/testReports/Jsoup`;
 
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
@@ -103,7 +104,9 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
 
         const testClassName = className.replace(".java", "Test.java");
-        terminal.sendText(`mvn test -Dtest=${testClassName}`);
+        terminal.sendText(
+          `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`
+        );
 
         terminal.sendText(
           'git add . && git commit -m "Did everything"' // TODO split up into more commits on the way?
