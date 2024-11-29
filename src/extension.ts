@@ -113,12 +113,27 @@ export function activate(context: vscode.ExtensionContext) {
 
           const testClassName = className.replace(".java", "Test.java");
 
-          try {
-            await execl(
-              `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`
+          // not using execl because manual handling of stderr
+          logToFile(`Compiling all tests`);
+          const { stderr, stdout, error } = await exec("mvn test-compile", {
+            cwd: PROJECT_PATH,
+          });
+          if (error) {
+            // LOG error
+            logToFile(`Error compiling tests: ${error}`);
+            // write to report file
+            fs.writeFileSync(
+              `${REPORTS_FOLDER}/${testClassName}.failure.txt`,
+              stderr
             );
-          } catch (error) {
-            // the above command will fail
+          } else {
+            // LOG success
+            logToFile(`Tests compiled successfully`);
+            // write stdout to file
+            fs.writeFileSync(
+              `${REPORTS_FOLDER}/${testClassName}.success.txt`,
+              stdout
+            );
           }
 
           // TODO split up into more commits on the way?
