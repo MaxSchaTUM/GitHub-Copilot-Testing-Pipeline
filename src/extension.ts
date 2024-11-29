@@ -158,8 +158,12 @@ export function deactivate() {}
 async function execl(command: string) {
   logToFile(`Executing command ${command}`);
   const { stderr, stdout, error } = await exec(command, { cwd: PROJECT_PATH });
-  logToFile(`stdout: ${stdout}`);
-  logToFile(`stderr: ${stderr}`);
+  if (stdout) {
+    logToFile(`stdout: ${stdout}`);
+  }
+  if (stderr) {
+    logToFile(`stderr: ${stderr}`);
+  }
   if (error) {
     throw error;
   }
