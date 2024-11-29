@@ -1,7 +1,7 @@
-import * as fs from "fs";
 import util from "util";
 import * as vscode from "vscode";
 const exec = util.promisify(require("child_process").exec);
+const fs = require("fs");
 
 const waitForStableCharacterCount = async (timeout = 30000) => {
   const start = Date.now();
@@ -36,6 +36,9 @@ const PROJECT_PATH = `${BASE_PATH}/Jsoup`;
 const CLASSES_PATH = `${BASE_PATH}/allClassPaths.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/Jsoup`;
 const LOG_FILE = `${BASE_PATH}/log.txt`;
+const outputLog = fs.createWriteStream(LOG_FILE);
+const errorsLog = fs.createWriteStream(LOG_FILE);
+const LOGGER = new console.Console(outputLog, errorsLog);
 
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
@@ -56,8 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       for (const currentClass of classesArray) {
         // write to log file prosessing current class
-        fs.appendFileSync(LOG_FILE, `${currentClass}\n`);
-        console.log(`Processing ${currentClass}`);
+        LOGGER.log(`Processing ${currentClass}`);
         try {
           const className = currentClass.split("/").pop();
           if (!className) {
@@ -122,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
           // write error to file with timestamp
           const date = new Date();
           const errorMessage = `${date.toISOString()} ${error}`;
-          fs.writeFileSync(LOG_FILE, errorMessage);
+          LOGGER.log(errorMessage);
           await exec("git checkout -f master", { cwd: PROJECT_PATH });
         }
       }
