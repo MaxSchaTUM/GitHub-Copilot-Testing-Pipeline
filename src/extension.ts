@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 const waitForStableCharacterCount = async (timeout = 30000) => {
   const start = Date.now();
   let previousCharacterCount = -1;
-  let stableForOneSecond = false;
 
   while (Date.now() - start < timeout) {
     const editor = vscode.window.activeTextEditor;
@@ -15,20 +14,13 @@ const waitForStableCharacterCount = async (timeout = 30000) => {
     const currentCharacterCount = editor.document.getText().length;
 
     if (currentCharacterCount === previousCharacterCount) {
-      // If the character count hasn't changed, wait another second
-      if (stableForOneSecond) {
-        return true; // No change for one second; return success
-      }
-      stableForOneSecond = true;
-    } else {
-      // Character count changed; reset the stable flag
-      stableForOneSecond = false;
+      return true; // No change for one second; return success
     }
 
     previousCharacterCount = currentCharacterCount;
 
-    // Wait for 1 second before checking again
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    // Wait for X second before checking again
+    await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
   throw new Error(
