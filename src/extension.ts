@@ -77,7 +77,7 @@ export function activate(context: vscode.ExtensionContext) {
           "github.copilot.chat.generateTests"
         );
         await waitForStableCharacterCount();
-        await vscode.commands.executeCommand("workbench.action.files.save");
+        await vscode.commands.executeCommand("workbench.action.files.save"); // triggers auto import
 
         const testDocument = vscode.window.activeTextEditor?.document;
         if (!testDocument) {
@@ -99,6 +99,8 @@ export function activate(context: vscode.ExtensionContext) {
             break;
           }
         }
+
+        await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
 
         const testClassName = className.replace(".java", "Test.java");
         terminal.sendText(`mvn test -Dtest=${testClassName}`);
