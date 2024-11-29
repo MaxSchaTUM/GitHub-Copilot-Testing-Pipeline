@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
       for (const currentClass of classesArray) {
         const className = currentClass.split("/").pop();
         if (!className) {
-          // TODO logging etc
+          console.log("no class name found");
           continue;
         }
         // create new branch
@@ -77,26 +77,40 @@ export function activate(context: vscode.ExtensionContext) {
           .replace(".java", "Test.java");
         terminal.sendText(`rm -rf ${testClass}`);
 
-        const document = await vscode.workspace.openTextDocument(
+        const cutDocument = await vscode.workspace.openTextDocument(
           PROJECT_PATH + "/" + currentClass
         );
-        await vscode.window.showTextDocument(document);
+        await vscode.window.showTextDocument(cutDocument);
         await vscode.commands.executeCommand(
           "github.copilot.chat.generateTests"
         );
         await waitForStableCharacterCount();
         await vscode.commands.executeCommand("workbench.action.files.save");
 
-        // +++++
-        // mvn test -Dtest=YourTestClassName > repoortFolder/YourTestClassName.txt
+        const testDocument = vscode.window.activeTextEditor?.document;
+        if (!testDocument) {
+          console.log("no test document found");
+          continue;
+        }
+        const linesOfTestDocument = testDocument.getText().split("\n");
+        for (let i = 0; i < linesOfTestDocument.length; i++) {
+          const line = linesOfTestDocument[i];
+          if (line.includes("package")) {
+            // delete package line at current line
+            await vscode.window.activeTextEditor?.edit((editBuilder) => {
+              editBuilder.delete(testDocument.lineAt(i).range);
+            });
+            // insert at top
+            await vscode.window.activeTextEditor?.edit((editBuilder) => {
+              editBuilder.insert(new vscode.Position(0, 0), line + "\n");
+            });
+            break;
+          }
+        }
 
-        // TODO test via mvn
         const testClassName = className.replace(".java", "Test.java");
         terminal.sendText(`mvn test -Dtest=${testClassName}`);
 
-        // +++++
-
-        // cleanup / reset
         terminal.sendText(
           'git add . && git commit -m "Did everything"' // TODO split up into more commits on the way?
         );
