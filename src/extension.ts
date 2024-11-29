@@ -36,9 +36,13 @@ const PROJECT_PATH = `${BASE_PATH}/Jsoup`;
 const CLASSES_PATH = `${BASE_PATH}/allClassPaths.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/Jsoup`;
 const LOG_FILE = `${BASE_PATH}/log.txt`;
-const outputLog = fs.createWriteStream(LOG_FILE);
-const errorsLog = fs.createWriteStream(LOG_FILE);
-const LOGGER = new console.Console(outputLog, errorsLog);
+// Custom logger function
+function logToFile(message: string) {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  // Append the log message to the file
+  fs.appendFileSync(LOG_FILE, logMessage);
+}
 
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
@@ -55,11 +59,10 @@ export function activate(context: vscode.ExtensionContext) {
       const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
       const classesContent = classes.getText();
       const classesArray = classesContent.split("\n");
-      await exec(`git checkout master`, { cwd: PROJECT_PATH });
+      await execl(`git checkout master`);
 
       for (const currentClass of classesArray) {
         // write to log file prosessing current class
-        LOGGER.log(`Processing ${currentClass}`);
         try {
           const className = currentClass.split("/").pop();
           if (!className) {
@@ -67,14 +70,14 @@ export function activate(context: vscode.ExtensionContext) {
             continue;
           }
           // create new branch
-          await exec(`git branch -f ${className}`, { cwd: PROJECT_PATH });
-          await exec(`git checkout ${className}`, { cwd: PROJECT_PATH });
+          await execl(`git branch -f ${className}`);
+          await execl(`git checkout ${className}`);
           // delete test class if it exists
           // we use a simple heuristic for the name for now
           const testClass = currentClass
             .replace("main", "test")
             .replace(".java", "Test.java");
-          await exec(`rm -rf ${testClass}`, { cwd: PROJECT_PATH });
+          await execl(`rm -rf ${testClass}`);
           const cutDocument = await vscode.workspace.openTextDocument(
             PROJECT_PATH + "/" + currentClass
           );
@@ -109,23 +112,22 @@ export function activate(context: vscode.ExtensionContext) {
           await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
 
           const testClassName = className.replace(".java", "Test.java");
-          await exec(
-            `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`,
-            { cwd: PROJECT_PATH }
-          );
+
+          try {
+            await execl(
+              `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`
+            );
+          } catch (error) {
+            // the above command will fail
+          }
 
           // TODO split up into more commits on the way?
-          await exec('git add . && git commit -m "Did everything"', {
-            cwd: PROJECT_PATH,
-          });
-          await exec("git checkout master", { cwd: PROJECT_PATH });
+          await execl('git add . && git commit -m "Did everything"');
+          await execl("git checkout master");
         } catch (error) {
-          console.log(error);
-          // write error to file with timestamp
-          const date = new Date();
-          const errorMessage = `${date.toISOString()} ${error}`;
-          LOGGER.log(errorMessage);
-          await exec("git checkout -f master", { cwd: PROJECT_PATH });
+          logToFile(`Error processing class ${currentClass}: ${error}`);
+          logToFile(`Rolling back to master and skipping to next class`);
+          await execl("git checkout -f master");
         }
       }
     }
@@ -136,3 +138,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
+
+// exec with logging
+async function execl(command: string) {
+  logToFile(`Executing command ${command}`);
+  const { stderr, stdout, error } = await exec(command, { cwd: PROJECT_PATH });
+  logToFile(`stdout: ${stdout}`);
+  logToFile(`stderr: ${stderr}`);
+  if (error) {
+    throw error;
+  }
+}
