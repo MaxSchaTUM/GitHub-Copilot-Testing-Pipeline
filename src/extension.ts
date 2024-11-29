@@ -33,7 +33,7 @@ const waitForStableCharacterCount = async (timeout = 30000) => {
 };
 const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/Jsoup`;
-const CLASSES_PATH = `${BASE_PATH}/allClassPaths.txt`; // contains list of relative path to classes within a project, one per line
+const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/allClassPaths.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/Jsoup`;
 const LOG_FILE = `${BASE_PATH}/log.txt`;
 // Custom logger function
