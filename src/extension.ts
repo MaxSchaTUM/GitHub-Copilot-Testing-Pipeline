@@ -1,5 +1,8 @@
 import * as fs from "fs";
+import util from "util";
 import * as vscode from "vscode";
+const exec = util.promisify(require("child_process").exec);
+
 const waitForStableCharacterCount = async (timeout = 30000) => {
   const start = Date.now();
   let previousCharacterCount = -1;
@@ -49,16 +52,12 @@ export function activate(context: vscode.ExtensionContext) {
       const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
       const classesContent = classes.getText();
       const classesArray = classesContent.split("\n");
-      classesArray.pop(); // remove last empty element
-      // prep terminal
-      const terminal = vscode.window.createTerminal();
-      terminal.show();
-      terminal.sendText(`cd ${PROJECT_PATH}`);
-      terminal.sendText(`git checkout master`); // TODO or main?
+      await exec(`git checkout master`, { cwd: PROJECT_PATH });
 
       for (const currentClass of classesArray) {
         // write to log file prosessing current class
         fs.appendFileSync(LOG_FILE, `${currentClass}\n`);
+        console.log(`Processing ${currentClass}`);
         try {
           const className = currentClass.split("/").pop();
           if (!className) {
@@ -66,15 +65,14 @@ export function activate(context: vscode.ExtensionContext) {
             continue;
           }
           // create new branch
-          terminal.sendText(`git branch ${className}`, true);
-          terminal.sendText(`git checkout ${className}`, true);
+          await exec(`git branch -f ${className}`, { cwd: PROJECT_PATH });
+          await exec(`git checkout ${className}`, { cwd: PROJECT_PATH });
           // delete test class if it exists
           // we use a simple heuristic for the name for now
           const testClass = currentClass
             .replace("main", "test")
             .replace(".java", "Test.java");
-          terminal.sendText(`rm -rf ${testClass}`);
-
+          await exec(`rm -rf ${testClass}`, { cwd: PROJECT_PATH });
           const cutDocument = await vscode.workspace.openTextDocument(
             PROJECT_PATH + "/" + currentClass
           );
@@ -109,22 +107,23 @@ export function activate(context: vscode.ExtensionContext) {
           await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
 
           const testClassName = className.replace(".java", "Test.java");
-          terminal.sendText(
-            `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`
+          await exec(
+            `mvn test -Dtest=${testClassName} > ${REPORTS_FOLDER}/${testClassName}.testResult.txt`,
+            { cwd: PROJECT_PATH }
           );
 
-          terminal.sendText(
-            'git add . && git commit -m "Did everything"' // TODO split up into more commits on the way?
-          );
-          terminal.sendText("git checkout master");
+          // TODO split up into more commits on the way?
+          await exec('git add . && git commit -m "Did everything"', {
+            cwd: PROJECT_PATH,
+          });
+          await exec("git checkout master", { cwd: PROJECT_PATH });
         } catch (error) {
           console.log(error);
           // write error to file with timestamp
           const date = new Date();
           const errorMessage = `${date.toISOString()} ${error}`;
           fs.writeFileSync(LOG_FILE, errorMessage);
-          terminal.sendText('git add . && git commit -m "Error"');
-          terminal.sendText("git checkout master");
+          await exec("git checkout -f master", { cwd: PROJECT_PATH });
         }
       }
     }
