@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 const exec = util.promisify(require("child_process").exec);
 const fs = require("fs");
 
-const waitForStableCharacterCount = async (timeout = 30000) => {
+const waitForStableCharacterCount = async (timeout = 60000) => {
   const start = Date.now();
   let previousCharacterCount = -1;
 
@@ -24,7 +24,7 @@ const waitForStableCharacterCount = async (timeout = 30000) => {
     previousCharacterCount = currentCharacterCount;
 
     // Wait for X second before checking again
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 10000));
   }
 
   return false; // Timeout
