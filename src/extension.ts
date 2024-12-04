@@ -27,9 +27,7 @@ const waitForStableCharacterCount = async (timeout = 30000) => {
     await new Promise((resolve) => setTimeout(resolve, 5000));
   }
 
-  throw new Error(
-    "Timeout: Character count did not stabilize within the given time."
-  );
+  return false; // Timeout
 };
 const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
@@ -89,8 +87,19 @@ export function activate(context: vscode.ExtensionContext) {
           await vscode.commands.executeCommand(
             "github.copilot.chat.generateTests"
           );
-          await waitForStableCharacterCount();
+
+          const finishedGeneratingWithinTime =
+            await waitForStableCharacterCount();
+
           await vscode.commands.executeCommand("workbench.action.files.save"); // triggers auto import
+
+          if (!finishedGeneratingWithinTime) {
+            logToFile(
+              `Failed to generate tests for class ${currentClass} within timeout`
+            );
+            await execl('git add . && git commit -m "Timeout"');
+            continue;
+          }
 
           const testDocument = vscode.window.activeTextEditor?.document;
           if (!testDocument) {
