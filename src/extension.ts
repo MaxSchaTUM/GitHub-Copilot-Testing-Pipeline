@@ -62,10 +62,13 @@ export function activate(context: vscode.ExtensionContext) {
       logToFile(`Classes: ${classesArray.join(", ")}`);
 
       for (const currentClass of classesArray) {
-        // start from clean state
-        await vscode.commands.executeCommand(
-          "workbench.action.closeAllEditors"
-        );
+        // Discard any unsaved changes
+        while (vscode.window.activeTextEditor) {
+          await vscode.commands.executeCommand(
+            "workbench.action.revertAndCloseActiveEditor"
+          );
+        }
+
         await execl(`git checkout -f base`);
         // write to log file prosessing current class
         try {
