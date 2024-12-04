@@ -62,6 +62,9 @@ export function activate(context: vscode.ExtensionContext) {
 
       for (const currentClass of classesArray) {
         // start from clean state
+        await vscode.commands.executeCommand(
+          "workbench.action.closeAllEditors"
+        );
         await execl(`git checkout -f base`);
         // write to log file prosessing current class
         try {
@@ -130,6 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
           continue;
         }
       }
+      logToFile("Done processing all classes");
     }
   );
 
