@@ -114,9 +114,13 @@ export function activate(context: vscode.ExtensionContext) {
 
           const testClassName = className.replace(".java", "Test.java");
 
-          await execl(
-            `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${testClassName}.report.txt 2>&1`
-          );
+          try {
+            await execl(
+              `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${testClassName}.report.txt 2>&1`
+            );
+          } catch (error) {
+            // TODO ignore for now. we expect compile and test run errors and this will make the mvn test command return with exit code != 0 which results in exec to throw
+          }
 
           // TODO split up into more commits on the way?
           await execl('git add . && git commit -m "Did everything"');
