@@ -58,6 +58,9 @@ export function activate(context: vscode.ExtensionContext) {
       const classesContent = classes.getText();
       const classesArray = classesContent.split("\n");
 
+      logToFile(`Received ${classesArray.length} classes`);
+      logToFile(`Classes: ${classesArray.join(", ")}`);
+
       for (const currentClass of classesArray) {
         // start from clean state
         await vscode.commands.executeCommand(
