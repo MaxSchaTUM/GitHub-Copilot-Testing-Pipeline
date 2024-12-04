@@ -62,7 +62,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       for (const currentClass of classesArray) {
         // start from clean state
-        await execl(`git checkout -f master`);
+        await execl(`git checkout -f base`);
         // write to log file prosessing current class
         try {
           const className = currentClass.split("/").pop();
