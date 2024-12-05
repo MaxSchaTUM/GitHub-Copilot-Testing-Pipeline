@@ -34,6 +34,8 @@ const PROJECT_PATH = `${BASE_PATH}/jsoup`;
 const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_all.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/jsoup`;
 const LOG_FILE = `${BASE_PATH}/log.txt`;
+const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
+
 // Custom logger function
 function logToFile(message: string) {
   const timestamp = new Date().toISOString();
@@ -97,7 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
           const finishedGeneratingWithinTime =
             await waitForStableCharacterCount();
 
-          await vscode.commands.executeCommand("workbench.action.files.save"); // triggers auto import
+          await vscode.commands.executeCommand("workbench.action.files.save");
 
           if (!finishedGeneratingWithinTime) {
             logToFile(
@@ -127,8 +129,10 @@ export function activate(context: vscode.ExtensionContext) {
               break;
             }
           }
-
           await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
+
+          // add missing imports with third party library as vscode auto import requires manual input in case of ambiguity
+          await execl(`java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`);
 
           const testClassName = className.replace(".java", "Test.java");
 
