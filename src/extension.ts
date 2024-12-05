@@ -95,24 +95,30 @@ export function activate(context: vscode.ExtensionContext) {
             "github.copilot.chat.generateTests"
           );
 
-          const finishedGeneratingWithinTime =
+          const { timeout, finalCharacterCount } =
             await waitForStableCharacterCount();
 
-          await vscode.commands.executeCommand("workbench.action.files.save");
+          await vscode.commands.executeCommand("workbench.action.files.save"); // should not trigger auto import!! this would make empty check invalid use third party tool later instead
 
-          if (!finishedGeneratingWithinTime) {
-            logToFile(
-              `Failed to generate tests for class ${currentClass} within timeout`
-            );
+          if (timeout) {
+            logToFile(`Generation for class ${currentClass} timed out`);
             await execl(
-              `echo "Timeout" > ${REPORTS_FOLDER}/${className}.report.txt`
+              `echo "timeout" > ${REPORTS_FOLDER}/${className}.report.txt`
             );
-            await execl('git add . && git commit -m "Timeout"');
+            await execl('git add . && git commit -m "timeout"');
+            continue;
+          } else if (finalCharacterCount === 0) {
+            logToFile(`Empty test file for class ${currentClass}`);
+            await execl(
+              `echo "empty" > ${REPORTS_FOLDER}/${className}.report.txt`
+            );
+            await execl('git add . && git commit -m "empty"');
             continue;
           }
 
-          // @ts-ignore we close all active editors at beginning of loop but we open a new one for the cut and test class document
-          // idk why ts is complaining
+          // relocate package
+          // we close all active editors at beginning of loop but we open a new one for the cut and test class document, idk why ts is complaining
+          // @ts-ignore
           const testDocument = vscode.window.activeTextEditor?.document;
           if (!testDocument) {
             logToFile(`No test document found, Skipping class ${currentClass}`);
@@ -138,6 +144,7 @@ export function activate(context: vscode.ExtensionContext) {
           await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
 
           // add missing imports with third party library as vscode auto import requires manual input in case of ambiguity
+          // no save should be necessary as tool writes to file directly
           await execl(`java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`);
 
           const testClassName = className.replace(".java", "Test.java");
