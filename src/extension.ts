@@ -146,9 +146,17 @@ export function activate(context: vscode.ExtensionContext) {
 
           // add missing imports with third party library as vscode auto import requires manual input in case of ambiguity
           // no save should be necessary as tool writes to file directly
-          await execl(`java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`);
-
-          await execl('git add . && git commit -m "Add missing imports"');
+          try {
+            await execl(
+              `java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`
+            );
+            await execl('git add . && git commit -m "Add missing imports"');
+          } catch (error) {
+            logToFile(
+              `Error adding imports for class ${currentClass}: ${error}`
+            );
+            // continue with test run even if imports could not be added
+          }
 
           const testClassName = className.replace(".java", "Test.java");
 
