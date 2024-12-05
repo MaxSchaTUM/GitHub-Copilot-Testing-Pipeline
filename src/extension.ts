@@ -99,20 +99,19 @@ export function activate(context: vscode.ExtensionContext) {
             await waitForStableCharacterCount();
 
           await vscode.commands.executeCommand("workbench.action.files.save"); // should not trigger auto import!! this would make empty check invalid use third party tool later instead
+          await execl('git add . && git commit -m "Generate tests"');
 
           if (timeout) {
             logToFile(`Generation for class ${currentClass} timed out`);
             await execl(
               `echo "timeout" > ${REPORTS_FOLDER}/${className}.report.txt`
             );
-            await execl('git add . && git commit -m "timeout"');
             continue;
           } else if (finalCharacterCount === 0) {
             logToFile(`Empty test file for class ${currentClass}`);
             await execl(
               `echo "empty" > ${REPORTS_FOLDER}/${className}.report.txt`
             );
-            await execl('git add . && git commit -m "empty"');
             continue;
           }
 
@@ -143,9 +142,13 @@ export function activate(context: vscode.ExtensionContext) {
           }
           await vscode.commands.executeCommand("workbench.action.files.save"); // save again because package was relocated
 
+          await execl('git add . && git commit -m "Relocate package"');
+
           // add missing imports with third party library as vscode auto import requires manual input in case of ambiguity
           // no save should be necessary as tool writes to file directly
           await execl(`java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`);
+
+          await execl('git add . && git commit -m "Add missing imports"');
 
           const testClassName = className.replace(".java", "Test.java");
 
@@ -157,7 +160,6 @@ export function activate(context: vscode.ExtensionContext) {
             // TODO ignore for now. we expect compile and test run errors and this will make the mvn test command return with exit code != 0 which results in exec to throw
           }
 
-          // TODO split up into more commits on the way?
           await execl('git add . && git commit -m "Did everything"');
         } catch (error) {
           logToFile(`Error processing class ${currentClass}: ${error}`);
