@@ -31,7 +31,7 @@ const waitForStableCharacterCount = async (timeout = 60000) => {
 };
 const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
-const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_all.txt`; // contains list of relative path to classes within a project, one per line
+const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_small.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/jsoup`;
 const LOG_FILE = `${BASE_PATH}/log.txt`;
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
@@ -109,6 +109,8 @@ export function activate(context: vscode.ExtensionContext) {
             continue;
           }
 
+          // @ts-ignore we close all active editors at beginning of loop but we open a new one for the cut and test class document
+          // idk why ts is complaining
           const testDocument = vscode.window.activeTextEditor?.document;
           if (!testDocument) {
             logToFile(`No test document found, Skipping class ${currentClass}`);
@@ -119,10 +121,12 @@ export function activate(context: vscode.ExtensionContext) {
             const line = linesOfTestDocument[i];
             if (line.includes("package")) {
               // delete package line at current line
+              // @ts-ignore same as above
               await vscode.window.activeTextEditor?.edit((editBuilder) => {
                 editBuilder.delete(testDocument.lineAt(i).range);
               });
               // insert at top
+              // @ts-ignore same as above
               await vscode.window.activeTextEditor?.edit((editBuilder) => {
                 editBuilder.insert(new vscode.Position(0, 0), line + "\n");
               });
