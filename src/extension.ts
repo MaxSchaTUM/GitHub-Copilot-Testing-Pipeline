@@ -105,6 +105,9 @@ export function activate(context: vscode.ExtensionContext) {
             logToFile(
               `Failed to generate tests for class ${currentClass} within timeout`
             );
+            await execl(
+              `echo "Timeout" > ${REPORTS_FOLDER}/${className}.report.txt`
+            );
             await execl('git add . && git commit -m "Timeout"');
             continue;
           }
@@ -142,7 +145,7 @@ export function activate(context: vscode.ExtensionContext) {
 
           try {
             await execl(
-              `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${testClassName}.report.txt 2>&1`
+              `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${className}.report.txt 2>&1`
             );
           } catch (error) {
             // TODO ignore for now. we expect compile and test run errors and this will make the mvn test command return with exit code != 0 which results in exec to throw
