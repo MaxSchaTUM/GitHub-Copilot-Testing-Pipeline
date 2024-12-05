@@ -14,11 +14,10 @@ const waitForStableCharacterCount = async (timeout = 60000) => {
       throw new Error("No active editor found.");
     }
 
-    // Get the current character count
     const currentCharacterCount = editor.document.getText().length;
 
     if (currentCharacterCount === previousCharacterCount) {
-      return true; // No change for one second; return success
+      return { timeout: false, finalCharacterCount: currentCharacterCount };
     }
 
     previousCharacterCount = currentCharacterCount;
@@ -27,7 +26,7 @@ const waitForStableCharacterCount = async (timeout = 60000) => {
     await new Promise((resolve) => setTimeout(resolve, 10000));
   }
 
-  return false; // Timeout
+  return { timeout: true, finalCharacterCount: previousCharacterCount }; // Timeout
 };
 const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
