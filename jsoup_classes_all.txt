@@ -1,12 +1,3 @@
-src/main/java9/module-info.java
-src/main/java9/org/jsoup/helper/RequestAuthHandler.java
-src/main/java/org/jsoup/Progress.java
-src/main/java/org/jsoup/UncheckedIOException.java
-src/main/java/org/jsoup/Jsoup.java
-src/main/java/org/jsoup/SerializationException.java
-src/main/java/org/jsoup/Connection.java
-src/main/java/org/jsoup/UnsupportedMimeTypeException.java
-src/main/java/org/jsoup/HttpStatusException.java
 src/main/java/org/jsoup/nodes/Attributes.java
 src/main/java/org/jsoup/nodes/Element.java
 src/main/java/org/jsoup/nodes/Node.java
