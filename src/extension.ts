@@ -62,6 +62,10 @@ export function activate(context: vscode.ExtensionContext) {
       logToFile(`Received ${classesArray.length} classes`);
       logToFile(`Classes: ${classesArray.join(", ")}`);
 
+      const terminal = vscode.window.createTerminal("Log");
+      terminal.show();
+      terminal.sendText(`tail -f ${LOG_FILE}`);
+
       for (const currentClass of classesArray) {
         // Discard any unsaved changes
         while (vscode.window.activeTextEditor) {
@@ -169,11 +173,6 @@ export function activate(context: vscode.ExtensionContext) {
           }
         } catch (error) {
           logToFile(`Error processing class ${currentClass}: ${error}`);
-          try {
-            await execl('git add . && git commit -m "error"');
-          } catch (error) {
-            // just try to commit if anything changes but if no changes can be commited that is fine
-          }
           logToFile(`skipping to next class`);
           continue;
         }
