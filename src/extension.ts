@@ -63,16 +63,14 @@ export function activate(context: vscode.ExtensionContext) {
       terminal.sendText(`tail -f ${LOG_FILE}`);
 
       for (const currentClass of classesArray) {
-        // Discard any unsaved changes
-        while (vscode.window.activeTextEditor) {
-          await vscode.commands.executeCommand(
-            "workbench.action.revertAndCloseActiveEditor"
-          );
-        }
-
-        await execl(`git checkout -f base`);
-        // write to log file prosessing current class
         try {
+          // Discard any unsaved changes
+          while (vscode.window.activeTextEditor) {
+            await vscode.commands.executeCommand(
+              "workbench.action.revertAndCloseActiveEditor"
+            );
+          }
+          await execl(`git checkout -f base`);
           const className = currentClass.split("/").pop();
           if (!className) {
             logToFile(`No class name found, Skipping class ${currentClass}`);
@@ -157,7 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
             `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${className}.report.txt 2>&1`
           );
         } catch (error) {
-          logToFile(`Error processing class ${currentClass}: ${error}`);
+          logToFile(`Unexpected error for class ${currentClass}: ${error}`);
           logToFile(`skipping to next class`);
           continue;
         }
