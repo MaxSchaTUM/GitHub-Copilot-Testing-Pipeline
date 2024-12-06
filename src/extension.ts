@@ -30,7 +30,7 @@ const waitForStableCharacterCount = async (timeout = 60000) => {
 };
 const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
-const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_all.txt`; // contains list of relative path to classes within a project, one per line
+const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_small.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/jsoup`;
 const LOG_FILE = `${BASE_PATH}/log.txt`;
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
@@ -153,9 +153,11 @@ export function activate(context: vscode.ExtensionContext) {
             // continue with test run even if imports could not be added
           }
 
+          const testClassName = testClass.split("/").pop();
+
           try {
             await execl(
-              `mvn test -Dtest=${testClass} -e -X > '${REPORTS_FOLDER}/${currentClass}.report.txt' 2>&1`
+              `mvn test -Dtest=${testClassName} -e -X > '${REPORTS_FOLDER}/${currentClass}.report.txt' 2>&1`
             );
           } catch (error) {
             // TODO ignore for now. we expect compile and test run errors and this will make the mvn test command return with exit code != 0 which results in exec to throw
