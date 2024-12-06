@@ -167,11 +167,13 @@ export function activate(context: vscode.ExtensionContext) {
           } catch (error) {
             // TODO ignore for now. we expect compile and test run errors and this will make the mvn test command return with exit code != 0 which results in exec to throw
           }
-
-          await execl('git add . && git commit -m "Did everything"');
         } catch (error) {
           logToFile(`Error processing class ${currentClass}: ${error}`);
-          await execl('git add . && git commit -m "error"');
+          try {
+            await execl('git add . && git commit -m "error"');
+          } catch (error) {
+            // just try to commit if anything changes but if no changes can be commited that is fine
+          }
           logToFile(`skipping to next class`);
           continue;
         }
