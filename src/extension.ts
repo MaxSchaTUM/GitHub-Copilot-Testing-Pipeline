@@ -31,7 +31,7 @@ const waitForStableCharacterCount = async (timeout = 60000) => {
 const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
 // TODO make this not hard coded but argument to extension
-const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_small.txt`; // contains list of relative path to classes within a project, one per line
+const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_all.txt`; // contains list of relative path to classes within a project, one per line
 const REPORTS_FOLDER = `${BASE_PATH}/testReports/jsoup`;
 const LOG_FILE = `${BASE_PATH}/log.txt`;
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
@@ -149,27 +149,14 @@ export function activate(context: vscode.ExtensionContext) {
 
           // add missing imports with third party library as vscode auto import requires manual input in case of ambiguity
           // no save should be necessary as tool writes to file directly
-          try {
-            await execl(
-              `java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`
-            );
-            await execl('git add . && git commit -m "Add missing imports"');
-          } catch (error) {
-            logToFile(
-              `Error adding imports for class ${currentClass}: ${error}`
-            );
-            // continue with test run even if imports could not be added
-          }
+          await execl(`java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`);
+          await execl('git add . && git commit -m "Add missing imports"');
 
           const testClassName = className.replace(".java", "Test.java");
 
-          try {
-            await execl(
-              `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${className}.report.txt 2>&1`
-            );
-          } catch (error) {
-            // TODO ignore for now. we expect compile and test run errors and this will make the mvn test command return with exit code != 0 which results in exec to throw
-          }
+          await execl(
+            `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${className}.report.txt 2>&1`
+          );
         } catch (error) {
           logToFile(`Error processing class ${currentClass}: ${error}`);
           logToFile(`skipping to next class`);
@@ -203,6 +190,6 @@ async function execl(command: string) {
     logToFile(`stderr: ${stderr}`);
   }
   if (error) {
-    throw error;
+    logToFile(`error: ${error}`);
   }
 }
