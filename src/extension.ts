@@ -1,6 +1,5 @@
-import util from "util";
 import * as vscode from "vscode";
-const exec = util.promisify(require("child_process").exec);
+import { exec } from "child_process";
 const fs = require("fs");
 
 const waitForStableCharacterCount = async (timeout = 60000) => {
@@ -179,17 +178,21 @@ export function activate(context: vscode.ExtensionContext) {
 // This method is called when your extension is deactivated
 export function deactivate() {}
 
-// exec with logging
+// async exec with logging
 async function execl(command: string) {
   logToFile(`Executing command ${command}`);
-  const { stderr, stdout, error } = await exec(command, { cwd: PROJECT_PATH });
-  if (stdout) {
-    logToFile(`stdout: ${stdout}`);
-  }
-  if (stderr) {
-    logToFile(`stderr: ${stderr}`);
-  }
-  if (error) {
-    logToFile(`error: ${error}`);
-  }
+  return new Promise<void>((resolve) =>
+    exec(command, { cwd: PROJECT_PATH }, (error, stdout, stderr) => {
+      if (stdout) {
+        logToFile(`stdout: ${stdout}`);
+      }
+      if (stderr) {
+        logToFile(`stderr: ${stderr}`);
+      }
+      if (error) {
+        logToFile(`error: ${error}`);
+      }
+      resolve();
+    })
+  );
 }
