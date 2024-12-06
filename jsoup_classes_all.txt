@@ -16,14 +16,12 @@ src/main/java/org/jsoup/nodes/DocumentType.java
 src/main/java/org/jsoup/nodes/Attribute.java
 src/main/java/org/jsoup/nodes/TextNode.java
 src/main/java/org/jsoup/nodes/PseudoTextElement.java
-src/main/java/org/jsoup/nodes/package-info.java
 src/main/java/org/jsoup/internal/StringUtil.java
 src/main/java/org/jsoup/internal/ReturnsAreNonnullByDefault.java
 src/main/java/org/jsoup/internal/Normalizer.java
 src/main/java/org/jsoup/internal/ConstrainableInputStream.java
 src/main/java/org/jsoup/internal/NonnullByDefault.java
 src/main/java/org/jsoup/internal/FieldsAreNonnullByDefault.java
-src/main/java/org/jsoup/internal/package-info.java
 src/main/java/org/jsoup/parser/HtmlTreeBuilderState.java
 src/main/java/org/jsoup/parser/Parser.java
 src/main/java/org/jsoup/parser/Tag.java
@@ -37,15 +35,9 @@ src/main/java/org/jsoup/parser/HtmlTreeBuilder.java
 src/main/java/org/jsoup/parser/TokenQueue.java
 src/main/java/org/jsoup/parser/ParseSettings.java
 src/main/java/org/jsoup/parser/XmlTreeBuilder.java
-src/main/java/org/jsoup/parser/package-info.java
 src/main/java/org/jsoup/parser/TokeniserState.java
 src/main/java/org/jsoup/safety/Safelist.java
 src/main/java/org/jsoup/safety/Cleaner.java
-src/main/java/org/jsoup/safety/package-info.java
-src/main/java/org/jsoup/examples/HtmlToPlainText.java
-src/main/java/org/jsoup/examples/Wikipedia.java
-src/main/java/org/jsoup/examples/ListLinks.java
-src/main/java/org/jsoup/examples/package-info.java
 src/main/java/org/jsoup/select/NodeTraversor.java
 src/main/java/org/jsoup/select/StructuralEvaluator.java
 src/main/java/org/jsoup/select/Collector.java
@@ -55,7 +47,6 @@ src/main/java/org/jsoup/select/CombiningEvaluator.java
 src/main/java/org/jsoup/select/Selector.java
 src/main/java/org/jsoup/select/Evaluator.java
 src/main/java/org/jsoup/select/NodeFilter.java
-src/main/java/org/jsoup/select/package-info.java
 src/main/java/org/jsoup/select/NodeVisitor.java
 src/main/java/org/jsoup/helper/ValidationException.java
 src/main/java/org/jsoup/helper/CookieUtil.java
@@ -65,4 +56,3 @@ src/main/java/org/jsoup/helper/Consumer.java
 src/main/java/org/jsoup/helper/Validate.java
 src/main/java/org/jsoup/helper/HttpConnection.java
 src/main/java/org/jsoup/helper/W3CDom.java
-src/main/java/org/jsoup/helper/package-info.java
