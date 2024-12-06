@@ -49,12 +49,6 @@ export function activate(context: vscode.ExtensionContext) {
     "gentestcopilot.helloWorld",
 
     async () => {
-      // TODO, for now assume i change projects manually
-      // open project in vscode workspace
-      //   vscode.workspace.updateWorkspaceFolders(0, 0, {
-      //     uri: vscode.Uri.file(PROJECT_PATH),
-      //   });
-      // get classes
       const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
       const classesContent = classes.getText();
       const classesArray = classesContent.split("\n");
