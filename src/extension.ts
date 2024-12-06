@@ -113,6 +113,8 @@ export function activate(context: vscode.ExtensionContext) {
             await execl(
               `echo "empty" > ${REPORTS_FOLDER}/${className}.report.txt`
             );
+            // sleep for one minute to avoid spamming the copilot api
+            await new Promise((resolve) => setTimeout(resolve, 60000));
             continue;
           }
 
