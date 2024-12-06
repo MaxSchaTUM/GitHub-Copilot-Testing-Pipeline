@@ -73,14 +73,9 @@ export function activate(context: vscode.ExtensionContext) {
         await execl(`git checkout -f base`);
         // write to log file prosessing current class
         try {
-          const className = currentClass.split("/").pop();
-          if (!className) {
-            logToFile(`No class name found, Skipping class ${currentClass}`);
-            continue;
-          }
           // create new branch
-          await execl(`git branch -f ${className}`);
-          await execl(`git checkout ${className}`);
+          await execl(`git branch -f '${currentClass}'`);
+          await execl(`git checkout '${currentClass}'`);
           // delete test class if it exists
           // we use a simple heuristic for the name for now
           const testClass = currentClass
@@ -104,13 +99,13 @@ export function activate(context: vscode.ExtensionContext) {
           if (timeout) {
             logToFile(`Generation for class ${currentClass} timed out`);
             await execl(
-              `echo "timeout" > ${REPORTS_FOLDER}/${className}.report.txt`
+              `echo "timeout" > '${REPORTS_FOLDER}/${currentClass}.report.txt'`
             );
             continue;
           } else if (finalCharacterCount === 0) {
             logToFile(`Empty test file for class ${currentClass}`);
             await execl(
-              `echo "empty" > ${REPORTS_FOLDER}/${className}.report.txt`
+              `echo "empty" > '${REPORTS_FOLDER}/${currentClass}.report.txt'`
             );
             continue;
           }
@@ -158,11 +153,9 @@ export function activate(context: vscode.ExtensionContext) {
             // continue with test run even if imports could not be added
           }
 
-          const testClassName = className.replace(".java", "Test.java");
-
           try {
             await execl(
-              `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${className}.report.txt 2>&1`
+              `mvn test -Dtest=${testClass} -e -X > '${REPORTS_FOLDER}/${currentClass}.report.txt' 2>&1`
             );
           } catch (error) {
             // TODO ignore for now. we expect compile and test run errors and this will make the mvn test command return with exit code != 0 which results in exec to throw
