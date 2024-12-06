@@ -87,7 +87,7 @@ export function activate(context: vscode.ExtensionContext) {
           const testClass = currentClass
             .replace("main", "test")
             .replace(".java", "Test.java");
-          await execl(`rm -rf ${testClass}`);
+          await execl(`rm ${testClass}`);
           const cutDocument = await vscode.workspace.openTextDocument(
             PROJECT_PATH + "/" + currentClass
           );
