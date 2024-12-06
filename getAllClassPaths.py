@@ -11,8 +11,12 @@ def get_java_files(src_folder):
     return java_files
 
 # only include CUT not test classes inside src/main/
-src_folder = "/Users/schaller/code/sqs_manual_experiment/Jsoup/src/main"
+src_folder = "/Users/schaller/code/sqs_manual_experiment/jsoup/src/main"
 java_files = get_java_files(src_folder)
+# filter out classes containing 'package-info' 
+java_files = [java_file for java_file in java_files if "package-info" not in java_file]
+# filter out classes in the examples folder
+java_files = [java_file for java_file in java_files if "/example" not in java_file]
 # now, prepend each name with src/main/ again to have correct relative path again
 java_files = ["src/main/" + java_file for java_file in java_files]
 
