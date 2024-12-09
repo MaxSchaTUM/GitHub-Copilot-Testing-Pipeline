@@ -73,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
               "workbench.action.revertAndCloseActiveEditor"
             );
           }
-          await execl(`git checkout -f base`);
+          await execl(`git checkout base`);
           const className = currentClass.split("/").pop();
           if (!className) {
             logToFile(`No class name found, Skipping class ${currentClass}`);
