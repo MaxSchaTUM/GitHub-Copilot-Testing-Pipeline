@@ -27,7 +27,7 @@ const waitForStableCharacterCount = async (timeout = 60000) => {
 
   return { timeout: true, finalCharacterCount: previousCharacterCount }; // Timeout
 };
-const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
+const BASE_PATH = "/Users/schaller/code/sqs";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
 // TODO make this not hard coded but argument to extension
 const CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_small.txt`; // contains list of relative path to classes within a project, one per line
