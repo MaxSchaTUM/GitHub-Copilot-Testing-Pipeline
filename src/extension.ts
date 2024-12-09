@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { exec } from "child_process";
 const fs = require("fs");
 
-const waitForStableCharacterCount = async (timeout = 60000) => {
+const waitForStableCharacterCount = async (timeout = 120000) => {
   const start = Date.now();
   let previousCharacterCount = -1;
 
@@ -168,6 +168,8 @@ export function activate(context: vscode.ExtensionContext) {
           (endTime.getTime() - startTime.getTime()) / 60000
         )}`
       );
+      logToFile("Backing up .git folder");
+      await execl(`cp -r ${PROJECT_PATH}/.git ${currentRunFolder}/.git`);
     }
   );
 
