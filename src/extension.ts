@@ -101,17 +101,15 @@ export function activate(context: vscode.ExtensionContext) {
           await vscode.commands.executeCommand("workbench.action.files.save"); // should not trigger auto import!! this would make empty check invalid use third party tool later instead
           await execl('git add . && git commit -m "Generate tests"');
 
+          const REPORT_FILE = `${currentRunFolder}/reports/${className}.report.txt`;
+
           if (timeout) {
             logToFile(`Generation for class ${currentClass} timed out`);
-            await execl(
-              `echo "timeout" > ${REPORTS_FOLDER}/${className}.report.txt`
-            );
+            await execl(`echo "timeout" > ${REPORT_FILE}`);
             continue;
           } else if (finalCharacterCount === 0) {
             logToFile(`Empty test file for class ${currentClass}`);
-            await execl(
-              `echo "empty" > ${REPORTS_FOLDER}/${className}.report.txt`
-            );
+            await execl(`echo "empty" > ${REPORT_FILE}`);
             // sleep for one minute to avoid spamming the copilot api
             await new Promise((resolve) => setTimeout(resolve, 60000));
             continue;
@@ -154,7 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
           const testClassName = className.replace(".java", "Test.java");
 
           await execl(
-            `mvn test -Dtest=${testClassName} -e -X > ${REPORTS_FOLDER}/${className}.report.txt 2>&1`
+            `mvn test -Dtest=${testClassName} -e -X > ${REPORT_FILE} 2>&1`
           );
         } catch (error) {
           logToFile(`Unexpected error for class ${currentClass}: ${error}`);
