@@ -79,9 +79,9 @@ export function activate(context: vscode.ExtensionContext) {
             logToFile(`No class name found, Skipping class ${currentClass}`);
             continue;
           }
-          // create new branch
-          await execl(`git branch -f ${className}`);
-          await execl(`git checkout ${className}`);
+
+          await execl(`git branch -D ${className}`); // from previous runs
+          await execl(`git checkout -b ${className}`);
           // delete test class if it exists
           // we use a simple heuristic for the name for now
           const testClass = currentClass
