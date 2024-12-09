@@ -30,8 +30,7 @@ const waitForStableCharacterCount = async (timeout = 60000) => {
 const BASE_PATH = "/Users/schaller/code/sqs_manual_experiment";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
 // TODO make this not hard coded but argument to extension
-const CLASSES_PATH = `${BASE_PATH}/gentestcopilot/jsoup_classes_all.txt`; // contains list of relative path to classes within a project, one per line
-const REPORTS_FOLDER = `${BASE_PATH}/testReports/jsoup`;
+const CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_small.txt`; // contains list of relative path to classes within a project, one per line
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
 const RUNS_FOLDER = "/Users/schaller/code/sqs/runs";
 const startTime = new Date();
