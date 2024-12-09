@@ -34,8 +34,10 @@ const CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_small.t
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
 const RUNS_FOLDER = "/Users/schaller/code/sqs/runs";
 const startTime = new Date();
-const currentRunFolder = `${RUNS_FOLDER}/${startTime}`;
+const currentRunFolder = `${RUNS_FOLDER}/${startTime.getTime()}`;
 fs.mkdirSync(currentRunFolder);
+const REPORTS_FOLDER = `${currentRunFolder}/reports`;
+fs.mkdirSync(REPORTS_FOLDER);
 const LOG_FILE = `${currentRunFolder}/log.txt`;
 
 // Custom logger function
