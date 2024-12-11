@@ -150,30 +150,10 @@ export function activate(context: vscode.ExtensionContext) {
           await execl(`java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`);
           await execl('git add . && git commit -m "Add missing imports"');
 
-          // check if tests compile, use raw exec instead of execl because i need return values
-          const { error, stdout } = await new Promise<{
-            error: Error | null;
-            stdout: string;
-          }>((resolve) => {
-            exec(
-              "mvn test-compile -e -X 2>&1",
-              { cwd: PROJECT_PATH },
-              (error, stdout) => resolve({ error, stdout })
-            );
-          });
-
-          if (error) {
-            await execl(`echo "COMPILATION ERROR" > ${REPORT_FILE}`);
-            await execl(`echo "${stdout}" >> ${REPORT_FILE}`); // only need stdout as I pipe stderr to stdout (2>&1), at least i hope lol
-            continue;
-          } else {
-            await execl(`echo "COMPILATION SUCCESS" > ${REPORT_FILE}`);
-          }
-
           const testClassName = className.replace(".java", "Test.java");
 
           await execl(
-            `mvn test -Dtest=${testClassName} -e -X >> ${REPORT_FILE} 2>&1`
+            `mvn test -Dtest=${testClassName} -e -X > ${REPORT_FILE} 2>&1`
           );
         } catch (error) {
           logToFile(`Unexpected error for class ${currentClass}: ${error}`);
