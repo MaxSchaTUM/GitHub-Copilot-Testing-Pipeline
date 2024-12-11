@@ -153,7 +153,11 @@ export function activate(context: vscode.ExtensionContext) {
           const testClassName = className.replace(".java", "Test.java");
 
           await execl(
-            `mvn test -Dtest=${testClassName} -e -X > ${REPORT_FILE} 2>&1`
+            `mvn clean test -Dtest=${testClassName} -e -X > ${REPORT_FILE} 2>&1`
+          );
+          // copy surfire xml report into reports folder
+          await execl(
+            `cp -r target/surefire-reports ${currentRunFolder}/reports/${className}-surefire-reports`
           );
         } catch (error) {
           logToFile(`Unexpected error for class ${currentClass}: ${error}`);
