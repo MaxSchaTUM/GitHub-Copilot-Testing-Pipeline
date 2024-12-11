@@ -150,7 +150,7 @@ export function activate(context: vscode.ExtensionContext) {
           await execl(`java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`);
           await execl('git add . && git commit -m "Add missing imports"');
 
-          // check if tests compile, use raw exec instead of execl because i need return values
+          logToFile("Checking if tests compile");
           const { error, stdout } = await new Promise<{
             error: Error | null;
             stdout: string;
