@@ -30,11 +30,20 @@ const waitForStableCharacterCount = async (timeout = 120000) => {
 const BASE_PATH = "/Users/schaller/code/sqs";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
 // TODO make this not hard coded but argument to extension
-const CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_small.txt`; // contains list of relative path to classes within a project, one per line
+const USE_SMALL_TEST_SET = false;
+let CLASSES_PATH: string;
+if (USE_SMALL_TEST_SET) {
+  CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_small.txt`;
+} else {
+  CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_all.txt`;
+}
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
 const RUNS_FOLDER = "/Users/schaller/code/sqs/runs";
 const startTime = new Date();
-const currentRunFolder = `${RUNS_FOLDER}/${startTime.getTime()}`;
+let currentRunFolder = `${RUNS_FOLDER}/${startTime.getTime()}`;
+if (USE_SMALL_TEST_SET) {
+  currentRunFolder += "_small";
+}
 fs.mkdirSync(currentRunFolder);
 const REPORTS_FOLDER = `${currentRunFolder}/reports`;
 fs.mkdirSync(REPORTS_FOLDER);
