@@ -93,7 +93,9 @@ export function activate(context: vscode.ExtensionContext) {
             await execl(`git checkout base`);
             const className = pair.functionalClassPath.split("/").pop();
             if (!className) {
-              logToFile(`No class name found, Skipping pair ${pair}`);
+              logToFile(
+                `No class name found, Skipping pair ${JSON.stringify(pair)}`
+              );
               continue;
             }
 
@@ -118,11 +120,13 @@ export function activate(context: vscode.ExtensionContext) {
             const REPORT_FILE = `${currentRunFolder}/reports/${className}.report.txt`;
 
             if (timeout) {
-              logToFile(`Generation for pair ${pair} timed out`);
+              logToFile(
+                `Generation for pair ${JSON.stringify(pair)} timed out`
+              );
               await execl(`echo "timeout" > ${REPORT_FILE}`);
               continue;
             } else if (finalCharacterCount === 0) {
-              logToFile(`Empty test file for pair ${pair}`);
+              logToFile(`Empty test file for pair ${JSON.stringify(pair)}`);
               await execl(`echo "empty" > ${REPORT_FILE}`);
               // sleep for one minute to avoid spamming the copilot api
               await new Promise((resolve) => setTimeout(resolve, 60000));
@@ -134,7 +138,9 @@ export function activate(context: vscode.ExtensionContext) {
             // @ts-ignore
             const testDocument = vscode.window.activeTextEditor?.document;
             if (!testDocument) {
-              logToFile(`No test document found, Skipping pair ${pair}`);
+              logToFile(
+                `No test document found, Skipping pair ${JSON.stringify(pair)}`
+              );
               continue;
             }
             const linesOfTestDocument = testDocument.getText().split("\n");
@@ -185,7 +191,9 @@ export function activate(context: vscode.ExtensionContext) {
               `cp -r target/surefire-reports ${currentRunFolder}/reports/${className}-surefire-reports`
             );
           } catch (error) {
-            logToFile(`Unexpected error for pair ${pair}: ${error}`);
+            logToFile(
+              `Unexpected error for pair ${JSON.stringify(pair)}: ${error}`
+            );
             logToFile(`skipping to next class`);
             continue;
           }
