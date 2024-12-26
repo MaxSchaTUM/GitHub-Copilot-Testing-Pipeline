@@ -34,9 +34,13 @@ const waitForStableCharacterCount = async (timeout = 120000) => {
   return { timeout: true, finalCharacterCount: previousCharacterCount }; // Timeout
 };
 const BASE_PATH = "/Users/schaller/code/sqs";
-const PROJECT_PATH = `${BASE_PATH}/jsoup`;
+const PROJECT_PATH = vscode.workspace.workspaceFolders?.[0].uri.fsPath || "";
+
 // TODO make this not hard coded but argument to extension
-const USE_SMALL_TEST_SET = true;
+const USE_SMALL_TEST_SET = false;
+// receive the above flag as argument to extension
+// const USE_SMALL_TEST_SET = process.argv[2] === "true";
+
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
 const RUNS_FOLDER = "/Users/schaller/code/sqs/runs";
 const NUMBER_OF_RUNS = 3; // set this manually to decide how many runs should be done for a given project for one time executing the extension
