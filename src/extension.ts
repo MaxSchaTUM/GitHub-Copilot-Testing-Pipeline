@@ -32,12 +32,6 @@ const BASE_PATH = "/Users/schaller/code/sqs";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
 // TODO make this not hard coded but argument to extension
 const USE_SMALL_TEST_SET = true;
-let CLASSES_PATH: string;
-if (USE_SMALL_TEST_SET) {
-  CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_small.txt`;
-} else {
-  CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_all.txt`;
-}
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
 const RUNS_FOLDER = "/Users/schaller/code/sqs/runs";
 const NUMBER_OF_RUNS = 3; // set this manually to decide how many runs should be done for a given project for one time executing the extension
@@ -57,27 +51,24 @@ export function activate(context: vscode.ExtensionContext) {
     "gentestcopilot.helloWorld",
 
     async () => {
+      const terminal = vscode.window.createTerminal("Log");
+      terminal.show();
+      terminal.sendText(`tail -f ${LOG_FILE}`);
+      logToFile(
+        `Starting extension for project ${PROJECT_PATH} with ${NUMBER_OF_RUNS} runs`
+      );
+
       const pairs = getClassTestPairs(PROJECT_PATH);
-      // log all class pairs
+      if (USE_SMALL_TEST_SET) {
+        logToFile(`Using small test set`);
+        pairs.splice(2);
+      }
       logToFile(`Received ${pairs.length} class pairs`);
       for (const pair of pairs) {
         logToFile(
           `Functional class: ${pair.functionalClassPath}, Test class: ${pair.testClassPath}`
         );
       }
-
-      logToFile(`Starting extension with ${NUMBER_OF_RUNS} runs`);
-
-      const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
-      const classesContent = classes.getText();
-      const classesArray = classesContent.split("\n");
-
-      logToFile(`Received ${classesArray.length} classes`);
-      logToFile(`Classes: ${classesArray.join(", ")}`);
-
-      const terminal = vscode.window.createTerminal("Log");
-      terminal.show();
-      terminal.sendText(`tail -f ${LOG_FILE}`);
 
       for (let i = 0; i < NUMBER_OF_RUNS; i++) {
         logToFile(`Starting run ${i + 1}`);
