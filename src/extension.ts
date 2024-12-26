@@ -14,9 +14,14 @@ const waitForStableCharacterCount = async (timeout = 120000) => {
       throw new Error("No active editor found.");
     }
 
-    const currentCharacterCount = editor.document.getText().length;
+    const text = editor.document.getText();
 
-    if (currentCharacterCount === previousCharacterCount) {
+    const currentCharacterCount = text.length;
+
+    if (
+      currentCharacterCount === previousCharacterCount &&
+      text.trim().slice(-1) === "}" // we assume copilot correctly closes class and if that is not the case yet the generation cannot be done so we wait
+    ) {
       return { timeout: false, finalCharacterCount: currentCharacterCount };
     }
 
@@ -124,6 +129,8 @@ export function activate(context: vscode.ExtensionContext) {
                 `Generation for pair ${JSON.stringify(pair)} timed out`
               );
               await execl(`echo "timeout" > ${REPORT_FILE}`);
+              // sleep for one minute to avoid spamming the copilot api
+              await new Promise((resolve) => setTimeout(resolve, 60000));
               continue;
             } else if (finalCharacterCount === 0) {
               logToFile(`Empty test file for pair ${JSON.stringify(pair)}`);
