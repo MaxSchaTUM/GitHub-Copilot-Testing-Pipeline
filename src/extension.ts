@@ -91,7 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
         fs.mkdirSync(currentRunFolder);
         const REPORTS_FOLDER = `${currentRunFolder}/reports`;
         fs.mkdirSync(REPORTS_FOLDER);
-        for (const currentClass of classesArray) {
+        for (const pair of pairs) {
           try {
             // Discard any unsaved changes
             while (vscode.window.activeTextEditor) {
@@ -100,22 +100,18 @@ export function activate(context: vscode.ExtensionContext) {
               );
             }
             await execl(`git checkout base`);
-            const className = currentClass.split("/").pop();
+            const className = pair.functionalClassPath.split("/").pop();
             if (!className) {
-              logToFile(`No class name found, Skipping class ${currentClass}`);
+              logToFile(`No class name found, Skipping pair ${pair}`);
               continue;
             }
 
             await execl(`git branch -D ${className}`); // from previous runs
             await execl(`git checkout -b ${className}`);
-            // delete test class if it exists
-            // we use a simple heuristic for the name for now
-            const testClass = currentClass
-              .replace("main", "test")
-              .replace(".java", "Test.java");
-            await execl(`rm ${testClass}`);
+            // delete dev test if it exists
+            await execl(`rm ${pair.testClassPath}`);
             const cutDocument = await vscode.workspace.openTextDocument(
-              PROJECT_PATH + "/" + currentClass
+              PROJECT_PATH + "/" + pair.functionalClassPath
             );
             await vscode.window.showTextDocument(cutDocument);
             await vscode.commands.executeCommand(
@@ -131,11 +127,11 @@ export function activate(context: vscode.ExtensionContext) {
             const REPORT_FILE = `${currentRunFolder}/reports/${className}.report.txt`;
 
             if (timeout) {
-              logToFile(`Generation for class ${currentClass} timed out`);
+              logToFile(`Generation for pair ${pair} timed out`);
               await execl(`echo "timeout" > ${REPORT_FILE}`);
               continue;
             } else if (finalCharacterCount === 0) {
-              logToFile(`Empty test file for class ${currentClass}`);
+              logToFile(`Empty test file for pair ${pair}`);
               await execl(`echo "empty" > ${REPORT_FILE}`);
               // sleep for one minute to avoid spamming the copilot api
               await new Promise((resolve) => setTimeout(resolve, 60000));
@@ -147,9 +143,7 @@ export function activate(context: vscode.ExtensionContext) {
             // @ts-ignore
             const testDocument = vscode.window.activeTextEditor?.document;
             if (!testDocument) {
-              logToFile(
-                `No test document found, Skipping class ${currentClass}`
-              );
+              logToFile(`No test document found, Skipping pair ${pair}`);
               continue;
             }
             const linesOfTestDocument = testDocument.getText().split("\n");
@@ -176,11 +170,11 @@ export function activate(context: vscode.ExtensionContext) {
             // add missing imports with third party library as vscode auto import requires manual input in case of ambiguity
             // no save should be necessary as tool writes to file directly
             await execl(
-              `java -jar ${JAVA_IMPORTER_PATH} --replace ${testClass}`
+              `java -jar ${JAVA_IMPORTER_PATH} --replace ${pair.testClassPath}`
             );
             await execl('git add . && git commit -m "Add missing imports"');
 
-            const testClassName = className.replace(".java", "Test.java");
+            const testClassName = pair.testClassPath.split("/").pop();
 
             await execl(
               `mvn clean test -Dtest=${testClassName} -e -X > ${REPORT_FILE} 2>&1`
@@ -190,7 +184,7 @@ export function activate(context: vscode.ExtensionContext) {
               `cp -r target/surefire-reports ${currentRunFolder}/reports/${className}-surefire-reports`
             );
           } catch (error) {
-            logToFile(`Unexpected error for class ${currentClass}: ${error}`);
+            logToFile(`Unexpected error for pair ${pair}: ${error}`);
             logToFile(`skipping to next class`);
             continue;
           }
