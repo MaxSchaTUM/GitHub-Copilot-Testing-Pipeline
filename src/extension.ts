@@ -30,7 +30,7 @@ const waitForStableCharacterCount = async (timeout = 120000) => {
 const BASE_PATH = "/Users/schaller/code/sqs";
 const PROJECT_PATH = `${BASE_PATH}/jsoup`;
 // TODO make this not hard coded but argument to extension
-const USE_SMALL_TEST_SET = false;
+const USE_SMALL_TEST_SET = true;
 let CLASSES_PATH: string;
 if (USE_SMALL_TEST_SET) {
   CLASSES_PATH = `/Users/schaller/code/sqs/get_classes/jsoup_classes_small.txt`;
@@ -195,6 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
         logToFile("Backing up .git folder");
         await execl(`cp -r ${PROJECT_PATH}/.git ${currentRunFolder}/.git`);
       }
+      logToFile(`Done with all runs`);
     }
   );
 
