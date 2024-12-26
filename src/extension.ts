@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { exec } from "child_process";
 const fs = require("fs");
+import * as path from "path";
 
 const waitForStableCharacterCount = async (timeout = 120000) => {
   const start = Date.now();
@@ -56,6 +57,15 @@ export function activate(context: vscode.ExtensionContext) {
     "gentestcopilot.helloWorld",
 
     async () => {
+      const pairs = getClassTestPairs(PROJECT_PATH);
+      // log all class pairs
+      logToFile(`Received ${pairs.length} class pairs`);
+      for (const pair of pairs) {
+        logToFile(
+          `Functional class: ${pair.functionalClassPath}, Test class: ${pair.testClassPath}`
+        );
+      }
+
       logToFile(`Starting extension with ${NUMBER_OF_RUNS} runs`);
 
       const classes = await vscode.workspace.openTextDocument(CLASSES_PATH);
@@ -222,4 +232,93 @@ async function execl(command: string) {
       resolve();
     })
   );
+}
+
+/**
+ * Recursively finds all *.java files under a given directory.
+ * @param dirPath - The directory to search in.
+ * @returns A list of absolute file paths for all .java files found.
+ */
+function findAllJavaFiles(dirPath: string): string[] {
+  let javaFiles: string[] = [];
+
+  const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+  for (const entry of entries) {
+    const entryPath = path.join(dirPath, entry.name);
+    if (entry.isDirectory()) {
+      // Recurse into subdirectories
+      javaFiles = javaFiles.concat(findAllJavaFiles(entryPath));
+    } else if (entry.isFile() && entry.name.endsWith(".java")) {
+      javaFiles.push(entryPath);
+    }
+  }
+
+  return javaFiles;
+}
+
+/**
+ * Given the base path of the project, returns an array of pairs:
+ *  { functionalClassPath, testClassPath }
+ * for each functional class that has at least one corresponding test class.
+ *
+ * It supports multiple naming conventions:
+ *   1. <BaseName>Test.java
+ *   2. Test<BaseName>.java
+ *   3. <BaseName>Tests.java
+ *
+ * @param projectBasePath - The absolute or relative path to the project root.
+ * @returns An array of objects, each containing:
+ *          { functionalClassPath: string, testClassPath: string }
+ */
+export function getClassTestPairs(projectBasePath: string): {
+  functionalClassPath: string;
+  testClassPath: string;
+}[] {
+  const mainJavaPath = path.join(projectBasePath, "src", "main", "java");
+  const testJavaPath = path.join(projectBasePath, "src", "test", "java");
+
+  // 1. Get all *.java files in src/main/java
+  const functionalClasses = findAllJavaFiles(mainJavaPath);
+
+  // Possible naming conventions for test classes
+  const testNamingPatterns: Array<(baseName: string) => string> = [
+    (baseName) => `${baseName}Test.java`,
+    (baseName) => `Test${baseName}.java`,
+    (baseName) => `${baseName}Tests.java`,
+  ];
+
+  const pairs: { functionalClassPath: string; testClassPath: string }[] = [];
+
+  for (const functionalClass of functionalClasses) {
+    // Example functional class path:
+    // /project/src/main/java/com/example/Parser.java
+    const relativePathFromMain = path.relative(mainJavaPath, functionalClass);
+    const dirName = path.dirname(relativePathFromMain); // e.g. "com/example"
+    const baseName = path.basename(relativePathFromMain, ".java"); // e.g. "Parser"
+
+    // For each naming pattern, compute the potential test file path
+    // If any exist, we record them.
+    const testFileMatches: string[] = [];
+    for (const pattern of testNamingPatterns) {
+      const testFileName = pattern(baseName); // e.g. ParserTest.java
+      const testFileFullPath = path.join(testJavaPath, dirName, testFileName);
+
+      if (fs.existsSync(testFileFullPath)) {
+        testFileMatches.push(testFileFullPath);
+      }
+    }
+
+    // If we found any matching test files, store them
+    // "Discard" the functional class only if no tests were found.
+    if (testFileMatches.length > 0) {
+      for (const matchPath of testFileMatches) {
+        pairs.push({
+          functionalClassPath: functionalClass,
+          testClassPath: matchPath,
+        });
+      }
+    }
+  }
+
+  return pairs;
 }
