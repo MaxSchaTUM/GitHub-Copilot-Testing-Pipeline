@@ -195,7 +195,7 @@ export function activate(context: vscode.ExtensionContext) {
             const testClassName = pair.testClassPath.split("/").pop();
 
             await execl(
-              `mvn clean test -Dtest=${testClassName} -e -X > ${REPORT_FILE} 2>&1`
+              `mvn clean test -Drat.skip=true -Dtest=${testClassName} -e -X > ${REPORT_FILE} 2>&1`
             );
             // copy surfire xml report into reports folder
             await execl(
