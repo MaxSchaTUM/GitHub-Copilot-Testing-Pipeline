@@ -43,7 +43,7 @@ const USE_SMALL_TEST_SET = false;
 
 const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
 const RUNS_FOLDER = "/Users/schaller/code/sqs/runs";
-const NUMBER_OF_RUNS = 3; // set this manually to decide how many runs should be done for a given project for one time executing the extension
+const NUMBER_OF_RUNS = 1; // set this manually to decide how many runs should be done for a given project for one time executing the extension
 const LOG_FILE = `${BASE_PATH}/log.txt`; // one log for all runs
 
 // Custom logger function
@@ -68,11 +68,14 @@ export function activate(context: vscode.ExtensionContext) {
       );
 
       const pairs = getClassTestPairs(PROJECT_PATH);
+      logToFile(`Received ${pairs.length} class pairs`);
       if (USE_SMALL_TEST_SET) {
         logToFile(`Using small test set`);
         pairs.splice(2);
+      } else {
+        pairs.splice(30); // max length
+        logToFile(`Using full test set`);
       }
-      logToFile(`Received ${pairs.length} class pairs`);
       for (const pair of pairs) {
         logToFile(
           `Functional class: ${pair.functionalClassPath}, Test class: ${pair.testClassPath}`
@@ -91,6 +94,11 @@ export function activate(context: vscode.ExtensionContext) {
         fs.mkdirSync(currentRunFolder);
         const REPORTS_FOLDER = `${currentRunFolder}/reports`;
         fs.mkdirSync(REPORTS_FOLDER);
+        // write pairs to a file inside run folder
+        fs.writeFileSync(
+          `${currentRunFolder}/pairs.json`,
+          JSON.stringify(pairs)
+        );
         for (const pair of pairs) {
           try {
             // Discard any unsaved changes
@@ -301,7 +309,7 @@ export function getClassTestPairs(projectBasePath: string): {
     (baseName) => `${baseName}Tests.java`,
   ];
 
-  const pairs: { functionalClassPath: string; testClassPath: string }[] = [];
+  let pairs: { functionalClassPath: string; testClassPath: string }[] = [];
 
   for (const functionalClass of functionalClasses) {
     // Example functional class path:
@@ -333,6 +341,5 @@ export function getClassTestPairs(projectBasePath: string): {
       }
     }
   }
-
   return pairs;
 }
