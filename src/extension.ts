@@ -86,8 +86,8 @@ export function activate(context: vscode.ExtensionContext) {
         logToFile(`Starting run ${i + 1}`);
         const startTime = new Date();
         let currentRunFolder = `${RUNS_FOLDER}/${startTime.getTime()}`;
-        // add project name as suffix to currentRunFolder
-        currentRunFolder += `_${PROJECT_PATH.split("/").pop()}`;
+        const projectName = PROJECT_PATH.split("/").pop();
+        currentRunFolder += `_${projectName}`;
         if (USE_SMALL_TEST_SET) {
           currentRunFolder += "_small";
         }
@@ -95,9 +95,13 @@ export function activate(context: vscode.ExtensionContext) {
         const REPORTS_FOLDER = `${currentRunFolder}/reports`;
         fs.mkdirSync(REPORTS_FOLDER);
         // write pairs to a file inside run folder
+        const jsonContent = {
+          project: projectName,
+          pairs: pairs,
+        };
         fs.writeFileSync(
           `${currentRunFolder}/pairs.json`,
-          JSON.stringify(pairs)
+          JSON.stringify(jsonContent)
         );
         for (const pair of pairs) {
           try {
