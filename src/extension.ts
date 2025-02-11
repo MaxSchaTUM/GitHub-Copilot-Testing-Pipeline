@@ -3,8 +3,7 @@ import { exec } from "child_process";
 const fs = require("fs");
 import * as path from "path";
 
-// TODO below replace with environment file
-
+// +++++++ CONFIGURATION +++++++
 // set to true to use small test set for debugging
 const USE_SMALL_TEST_SET = false;
 // how often the experiments should be repeated
@@ -13,9 +12,11 @@ const NUMBER_OF_RUNS = 3;
 const LOG_FILE = `some_path/log.txt`; // one log for all runs
 // path to javaimports jar
 // https://github.com/nicolascouvrat/javaimports
-const JAVA_IMPORTER_PATH = `some_path/javaimports-1.5-all-deps.jar`;
+const JAVA_IMPORTER_PATH = `some_path/path-to-dependency.jar`;
 // where the results should be saved to
 const RUNS_FOLDER = "some_path/runs";
+// +++++++ END CONFIGURATION +++++++
+
 // do not change below
 const PROJECT_PATH = vscode.workspace.workspaceFolders?.[0].uri.fsPath || "";
 
