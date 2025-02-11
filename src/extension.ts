@@ -138,7 +138,7 @@ export function activate(context: vscode.ExtensionContext) {
             const { timeout, finalCharacterCount } =
               await waitForStableCharacterCount();
 
-            await vscode.commands.executeCommand("workbench.action.files.save"); // should not trigger auto import!! this would make empty check invalid use third party tool later instead
+            await vscode.commands.executeCommand("workbench.action.files.save");
             await execl('git add . && git commit -m "Generate tests"');
 
             const REPORT_FILE = `${currentRunFolder}/reports/${className}.report.txt`;
@@ -160,8 +160,7 @@ export function activate(context: vscode.ExtensionContext) {
             }
 
             // relocate package
-            // we close all active editors at beginning of loop but we open a new one for the cut and test class document, idk why ts is complaining
-            // @ts-ignore
+            // @ts-ignore unknown ts error
             const testDocument = vscode.window.activeTextEditor?.document;
             if (!testDocument) {
               logToFile(
@@ -174,12 +173,12 @@ export function activate(context: vscode.ExtensionContext) {
               const line = linesOfTestDocument[i];
               if (line.includes("package")) {
                 // delete package line at current line
-                // @ts-ignore same as above
+                // @ts-ignore unknown ts error
                 await vscode.window.activeTextEditor?.edit((editBuilder) => {
                   editBuilder.delete(testDocument.lineAt(i).range);
                 });
                 // insert at top
-                // @ts-ignore same as above
+                // @ts-ignore unknown ts error
                 await vscode.window.activeTextEditor?.edit((editBuilder) => {
                   editBuilder.insert(new vscode.Position(0, 0), line + "\n");
                 });
