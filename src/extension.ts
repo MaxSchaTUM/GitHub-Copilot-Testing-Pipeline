@@ -3,6 +3,22 @@ import { exec } from "child_process";
 const fs = require("fs");
 import * as path from "path";
 
+// TODO below replace with environment file
+
+// set to true to use small test set for debugging
+const USE_SMALL_TEST_SET = false;
+// how often the experiments should be repeated
+const NUMBER_OF_RUNS = 3;
+// path to txt file for logging
+const LOG_FILE = `some_path/log.txt`; // one log for all runs
+// path to javaimports jar
+// https://github.com/nicolascouvrat/javaimports
+const JAVA_IMPORTER_PATH = `some_path/javaimports-1.5-all-deps.jar`;
+// where the results should be saved to
+const RUNS_FOLDER = "some_path/runs";
+// do not change below
+const PROJECT_PATH = vscode.workspace.workspaceFolders?.[0].uri.fsPath || "";
+
 const waitForStableCharacterCount = async (timeout = 120000) => {
   const start = Date.now();
   let previousCharacterCount = -1;
@@ -33,18 +49,6 @@ const waitForStableCharacterCount = async (timeout = 120000) => {
 
   return { timeout: true, finalCharacterCount: previousCharacterCount }; // Timeout
 };
-const BASE_PATH = "/Users/schaller/code/sqs";
-const PROJECT_PATH = vscode.workspace.workspaceFolders?.[0].uri.fsPath || "";
-
-// TODO make this not hard coded but argument to extension
-const USE_SMALL_TEST_SET = false;
-// receive the above flag as argument to extension
-// const USE_SMALL_TEST_SET = process.argv[2] === "true";
-
-const JAVA_IMPORTER_PATH = `${BASE_PATH}/javaimports-1.5-all-deps.jar`;
-const RUNS_FOLDER = "/Users/schaller/code/sqs/runs";
-const NUMBER_OF_RUNS = 1; // set this manually to decide how many runs should be done for a given project for one time executing the extension
-const LOG_FILE = `${BASE_PATH}/log.txt`; // one log for all runs
 
 // Custom logger function
 function logToFile(message: string) {
@@ -57,7 +61,7 @@ function logToFile(message: string) {
 export function activate(context: vscode.ExtensionContext) {
   // The commandId parameter must match the command field in package.json
   const disposable = vscode.commands.registerCommand(
-    "gentestcopilot.helloWorld",
+    "gentestcopilot.generateTests",
 
     async () => {
       const terminal = vscode.window.createTerminal("Log");

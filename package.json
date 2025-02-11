@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "gentestcopilot.helloWorld",
-        "title": "Hello World"
+        "command": "gentestcopilot.generateTests",
+        "title": "Generate Copilot Tests"
       }
     ]
   },
