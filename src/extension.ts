@@ -77,7 +77,6 @@ export function activate(context: vscode.ExtensionContext) {
         logToFile(`Using small test set`);
         pairs.splice(2);
       } else {
-        pairs.splice(30); // max length
         logToFile(`Using full test set`);
       }
       for (const pair of pairs) {
